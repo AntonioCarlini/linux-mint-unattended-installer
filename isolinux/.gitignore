@@ -1,0 +1,11 @@
+*.bin
+*.c32
+*.jpg
+*.tr
+16x16.fnt
+boot.cat
+bootlogo
+langlist
+pci.ids
+splash.png
+

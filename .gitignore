@@ -1,0 +1,8 @@
+.disk/
+EFI/
+MD5SUMS
+README.diskdefines
+boot/
+casper/
+dists/
+pool/
