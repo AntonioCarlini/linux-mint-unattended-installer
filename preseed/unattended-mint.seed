@@ -8,3 +8,7 @@ d-i debian-installer/locale string en_GB.utf-8
 # Console
 d-i console-setup/ask_detect boolean false
 d-i console-setup/layoutcode string UK
+
+# Keyboard layout
+d-i keyboard-configuration/xkb-keymap string gb
+d-i keyboard-configuration/layoutcode string gb
