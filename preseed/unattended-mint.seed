@@ -12,3 +12,20 @@ d-i console-setup/layoutcode string UK
 # Keyboard layout
 d-i keyboard-configuration/xkb-keymap string gb
 d-i keyboard-configuration/layoutcode string gb
+
+# Partitioning
+# WARNING: THIS IS TEMPORARY. IT MAY DELETE EXISTING DATA. 
+ubiquity partman-auto/disk string /dev/sda
+ubiquity partman-auto/method string regular
+ubiquity partman-lvm/device_remove_lvm boolean true
+ubiquity partman-md/device_remove_md boolean true
+ubiquity partman-auto/choose_recipe select atomic
+ubiquity partman/mount_style select uuid
+
+# This makes partman automatically partition without confirmation
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+
