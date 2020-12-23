@@ -53,3 +53,9 @@ d-i ubiquity/reboot boolean true
 d-i netcfg/get_hostname string testuna
 d-i netcfg/get_domain string flexbl.co.uk
 d-i netcfg/choose_interface select auto
+
+# Apt: Packages, Mirrors, Image
+d-i mirror/country string UK
+d-i apt-setup/multiverse boolean true
+d-i apt-setup/restricted boolean true
+d-i apt-setup/universe boolean true
