@@ -48,3 +48,8 @@ d-i passwd/root-login boolean false
 
 # Reboot at the end of the install
 d-i ubiquity/reboot boolean true 
+
+# Network
+d-i netcfg/get_hostname string testuna
+d-i netcfg/get_domain string flexbl.co.uk
+d-i netcfg/choose_interface select auto
