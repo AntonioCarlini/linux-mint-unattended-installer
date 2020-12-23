@@ -39,3 +39,10 @@ d-i clock-setup/utc boolean true
 d-i time/zone string Europe/London
 d-i clock-setup/ntp boolean true
 
+# User
+d-i passwd/user-fullname string Antonio Carlini
+ubiquity passwd/username string antonioc
+d-i passwd/user-password-crypted password $6$9npSgiXrPLALQOaG$ebsf0BjX1UPbbK7UNlfuo45fyCN7XqeGDXXiooY4aHpj2RIhWWagiITaWyMb22KIQDkqgp9QhdqSn7hY1PFsF1
+d-i passwd/user-default-groups string adm audio cdrom dip lpadmin sudo plugdev sambashare video
+d-i passwd/root-login boolean false
+
