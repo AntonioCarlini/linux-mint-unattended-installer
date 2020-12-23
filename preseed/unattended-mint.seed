@@ -1,1 +1,10 @@
-# Empty
+# Select the language
+d-i languagechooser/language-name string English
+d-i countrychooser/shortlist string UK
+d-i debian-installer/language string en
+d-i debian-installer/country string UK
+d-i debian-installer/locale string en_GB.utf-8
+
+# Console
+d-i console-setup/ask_detect boolean false
+d-i console-setup/layoutcode string UK
