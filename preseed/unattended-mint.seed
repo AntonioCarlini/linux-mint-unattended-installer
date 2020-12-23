@@ -46,3 +46,5 @@ d-i passwd/user-password-crypted password $6$9npSgiXrPLALQOaG$ebsf0BjX1UPbbK7UNl
 d-i passwd/user-default-groups string adm audio cdrom dip lpadmin sudo plugdev sambashare video
 d-i passwd/root-login boolean false
 
+# Reboot at the end of the install
+d-i ubiquity/reboot boolean true 
