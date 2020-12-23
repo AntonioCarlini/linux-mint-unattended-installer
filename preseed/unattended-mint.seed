@@ -3,7 +3,6 @@ d-i languagechooser/language-name string English
 d-i countrychooser/shortlist string UK
 d-i debian-installer/language string en
 d-i debian-installer/country string UK
-d-i debian-installer/locale string en_GB.utf-8
 
 # Console
 d-i console-setup/ask_detect boolean false
@@ -28,4 +27,15 @@ d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
 
+# Locales
+# Find available locales in /etc/locale.gen
+# Post-install, check on locales using: locale -a
+d-i debian-installer/locale string en_GB.utf-8
+d-i localechooser/supported-locales string ja_JP.utf-8, it_IT.utf-8
+
+# Timezone setup
+d-i clock-setup/utc-auto boolean true
+d-i clock-setup/utc boolean true
+d-i time/zone string Europe/London
+d-i clock-setup/ntp boolean true
 
