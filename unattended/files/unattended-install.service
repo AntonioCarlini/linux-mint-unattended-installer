@@ -1,0 +1,16 @@
+[Unit]
+ Description=Post-boot install completion (after first boot)
+ ConditionPathExists=/opt/unattended-install/post-boot-installation.sh
+ Wants=network-online.target
+ After=network.target network-online.target
+[Service]
+ Type=forking
+ User=root
+ WorkingDirectory=/root
+ ExecStart=/bin/bash /opt/unattended-install/post-boot-installation.sh
+ TimeoutSec=0
+ StandardOutput=tty
+ RemainAfterExit=yes
+
+[Install]
+ WantedBy=multi-user.target

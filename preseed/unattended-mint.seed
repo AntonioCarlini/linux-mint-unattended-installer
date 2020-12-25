@@ -59,3 +59,14 @@ d-i mirror/country string UK
 d-i apt-setup/multiverse boolean true
 d-i apt-setup/restricted boolean true
 d-i apt-setup/universe boolean true
+
+# Run further commands after the main installation has been performed.
+# Do this by setting up a systemd service to invoke a shell script after the next reboot.
+# In addition install openssh-server to ensure that there is easy access to the system.
+ubiquity ubiquity/success_command string \
+	 mkdir -p /target/opt/unattended-install ; \
+	 cp /cdrom/unattended/files/post-boot-installation.sh /target/opt/unattended-install/. ; \
+	 cp /cdrom/unattended/files/unattended-install.service /target/etc/systemd/system/. ;\
+	 ln -s /target/etc/systemd/system/unattended-install.service /target/etc/systemd/system/multi-user.target.wants/unattended-install.service ; \
+	 in-target apt-get update; \
+	 in-target apt-get install -y --no-install-recommends openssh-server
