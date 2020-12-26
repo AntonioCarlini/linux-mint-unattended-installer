@@ -54,8 +54,7 @@ main_actions() {
 
     # Run suitable ansible scripts
     ANSIBLE_SCRIPTS=""
-    ANSIBLE_SCRIPTS="${ANSIBLE_SCRIPTS} document-tools.yml"
-    ANSIBLE_SCRIPTS="${ANSIBLE_SCRIPTS} work-station.yml"
+    ANSIBLE_SCRIPTS="${ANSIBLE_SCRIPTS} vmware-host.yml"
     run_ansible_playbooks ${ANSIBLE_SCRIPTS}
     
     # Stop this from running again
