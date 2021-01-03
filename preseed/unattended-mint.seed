@@ -1,3 +1,5 @@
+# Helpful partitioning info: https://cptyesterday.wordpress.com/2012/07/20/get-expert_recipe-mdraid-lvm-gpt-and-grub2-playing-together-on-ubuntu-lucid-and-debian-squeeze/
+
 # Select the language
 d-i languagechooser/language-name string English
 d-i countrychooser/shortlist string UK
@@ -14,18 +16,100 @@ d-i keyboard-configuration/layoutcode string gb
 
 # Partitioning
 # WARNING: THIS IS TEMPORARY. IT MAY DELETE EXISTING DATA. 
-ubiquity partman-auto/disk string /dev/sda
-ubiquity partman-auto/method string regular
-ubiquity partman-lvm/device_remove_lvm boolean true
-ubiquity partman-md/device_remove_md boolean true
-ubiquity partman-auto/choose_recipe select atomic
-ubiquity partman/mount_style select uuid
 
-# This makes partman automatically partition without confirmation
+d-i partman-auto/disk string /dev/sda
+d-i partman-auto/method string regular
+d-i partman-auto/purge_lvm_from_device boolean true
+d-i partman-basicfilesystems/choose_label string gpt
+d-i partman-basicfilesystems/default_label string gpt
+d-i partman-lvm/confirm boolean true
+d-i partman-lvm/confirm_nooverwrite boolean true
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-lvm/device_remove_lvm_span boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-partitioning partman-partitioning/choose_label select gpt
+d-i partman-partitioning/choose_label string gpt
 d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman-partitioning/default_label string gpt
+d-i partman/choose_label string gpt
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
+d-i partman/default_label string gpt
+d-i partman/mount_style select uuid
+
+ubiquity partman-auto-lvm/guided_size string max
+ubiquity partman-auto/disk string /dev/sda
+ubiquity partman-auto/method string regular
+ubiquity partman-auto/purge_lvm_from_device boolean true
+ubiquity partman-basicfilesystems/choose_label string gpt
+ubiquity partman-basicfilesystems/default_label string gpt
+ubiquity partman-lvm/confirm boolean true
+ubiquity partman-lvm/confirm_nooverwrite boolean true
+ubiquity partman-lvm/device_remove_lvm boolean true
+ubiquity partman-lvm/device_remove_lvm_span boolean true
+ubiquity partman-md/device_remove_md boolean true
+ubiquity partman-partitioning partman-partitioning/choose_label select gpt
+ubiquity partman-partitioning/choose_label string gpt
+ubiquity partman-partitioning/confirm_write_new_label boolean true
+ubiquity partman-partitioning/default_label string gpt
+ubiquity partman/choose_label string gpt
+ubiquity partman/choose_partition select finish
+ubiquity partman/confirm boolean true
+ubiquity partman/confirm_nooverwrite boolean true
+ubiquity partman/default_label string gpt
+ubiquity partman/mount_style select uuid
+
+### BEGIN CUSTOM PARTITIONING ###
+# 
+ubiquity partman-auto/choose_recipe select disk_layout
+#ubiquity partman-auto/expert_recipe_file string /cdrom/unattended/files/partitioning-recipe.txt
+#
+# /boot   255 MB
+# efi     128 MB
+# /        20 GB
+# /home   remaining free space
+#
+# The "free" partition is the "Reserved for BIOS" area.
+#
+ubiquity partman-auto/expert_recipe string                    \
+      disk_layout ::                                          \
+             1 1 1 free                                       \
+                $iflabel{ gpt }                               \
+                method{ biosgrub }                            \
+             .                                                \
+             128 128 128 fat32                                \
+	      	      lv_name{ bootloader }                   \
+                      label{ bootloader }                     \
+		      $bootable{ }                            \
+		      $primary{ }                             \
+                      method{ efi }                           \
+                      format{ }                               \
+              .                                               \
+              255 255 255 ext4                                \
+                      $primary{ } $bootable{ }                \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext4 }    \
+                      mountpoint{ /boot }                     \
+              .                                               \
+              2000 2000 2000 linux-swap                       \
+                      $lvmok{ } lv_name{ swap }               \
+                      method{ swap } format{ }                \
+              .                                               \
+              20000 20000 20000 ext4                          \
+                      $lvmok{ } lv_name{ root }               \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext4 }    \
+                      mountpoint{ / }                         \
+              .                                               \
+              500 10000 1000000000 ext4                       \
+                      $lvmok{ } lv_name{ home }               \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext4 }    \
+                      mountpoint{ /home }                     \
+              .                                               \
+
+### END CUSTOM PARTITIONING ###
 
 # Locales
 # Find available locales in /etc/locale.gen
@@ -47,7 +131,8 @@ d-i passwd/user-default-groups string adm audio cdrom dip lpadmin sudo plugdev s
 d-i passwd/root-login boolean false
 
 # Reboot at the end of the install
-d-i ubiquity/reboot boolean true 
+# TODO
+d-i ubiquity/reboot boolean true
 
 # Network
 d-i netcfg/get_hostname string testuna
@@ -63,10 +148,12 @@ d-i apt-setup/universe boolean true
 # Run further commands after the main installation has been performed.
 # Do this by setting up a systemd service to invoke a shell script after the next reboot.
 # In addition install openssh-server to ensure that there is easy access to the system.
+# Store the env for the systemd process in /root/env.proc1 so the post reboot installer has access to the SYSTEM_CLASS variable on the kernel command line
 ubiquity ubiquity/success_command string \
 	 mkdir -p /target/opt/unattended-install ; \
 	 cp /cdrom/unattended/files/post-boot-installation.sh /target/opt/unattended-install/. ; \
 	 cp /cdrom/unattended/files/unattended-install.service /target/etc/systemd/system/. ;\
 	 ln -s /target/etc/systemd/system/unattended-install.service /target/etc/systemd/system/multi-user.target.wants/unattended-install.service ; \
+	 strings –a /proc/1/environ > /target/root/env.proc1; \
 	 in-target apt-get update; \
 	 in-target apt-get install -y --no-install-recommends openssh-server

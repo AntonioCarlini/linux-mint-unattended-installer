@@ -26,8 +26,6 @@ main_actions() {
     this_script="$0"
     echo "Running ${this_script}"
 
-    touch /root/unattended.install.invoked
-
     echo "================================================================================"
     echo "Performing apt update"
     apt-get update
@@ -53,9 +51,20 @@ main_actions() {
     apt-get install -y --no-install-recommends ansible
 
     # Run suitable ansible scripts
-    ANSIBLE_SCRIPTS=""
-    ANSIBLE_SCRIPTS="${ANSIBLE_SCRIPTS} vmware-host.yml"
-    run_ansible_playbooks ${ANSIBLE_SCRIPTS}
+    style=`grep SYSTEM_CLASS /root/env.proc1`
+    export ${style}
+    as_minimal=""
+    as_vmbase="vmware-host.yml"
+    as_workstation="work-station.yml"
+    v_name="as_${SYSTEM_CLASS}"
+    ANSIBLE_SCRIPTS="${!v_name}"
+    if [ -n "${ANSIBLE_SCRIPTS}" ]
+    then
+	echo "Running ansible scripts: [${ANSIBLE_SCRIPTS}]"
+        run_ansible_playbooks ${ANSIBLE_SCRIPTS}
+    else
+	echo "NO ansible scripts to run for [${SYSTEM_CLASS}]"
+    fi
     
     # Stop this from running again
     systemctl disable unattended-install.service
