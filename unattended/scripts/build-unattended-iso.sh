@@ -59,3 +59,9 @@ mkisofs -D -r -V "AIO_MINT" -cache-inodes -J -l \
 	-quiet \
 	-o "${target}" \
 	"${source}"
+
+isohybrid "${target}"
+
+if [ "$?" = "0" ]; then
+    echo "Unattended ISO: ${target}"
+fi
