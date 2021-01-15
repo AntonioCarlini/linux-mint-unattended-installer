@@ -63,6 +63,10 @@ prepare_aio_repo()
 	    exit 1
 	fi
     fi
+
+    # Remove some text files from the repo that do not really belong on the ISO
+    rm LICENSE
+    rm README.md
 }
 
 # Display a message with instructions on how to use this procesure
