@@ -74,20 +74,19 @@ ubiquity partman-auto/choose_recipe select disk_layout
 #
 ubiquity partman-auto/expert_recipe string                    \
       disk_layout ::                                          \
-             1 1 1 free                                       \
-                $iflabel{ gpt }                               \
-                method{ biosgrub }                            \
-             .                                                \
-             128 128 128 fat32                                \
-	      	      lv_name{ bootloader }                   \
-                      label{ bootloader }                     \
-		      $bootable{ }                            \
-		      $primary{ }                             \
-                      method{ efi }                           \
-                      format{ }                               \
+              1 1 1 fat32                                     \
+                      method{ biosgrub }                      \
               .                                               \
-              255 255 255 ext4                                \
-                      $primary{ } $bootable{ }                \
+              522 100009 600 fat32                            \
+                      $primary{ }                             \
+                      bootable{ }                             \
+                      $iflabel{ gpt }                         \
+                      $reusemethod{ }                         \
+                      method{ efi } format{ }                 \
+                      mountpoint{ /boot/efi }                 \
+		      .                                       \
+              256 100008 256 ext4                             \
+                      $primary{ }                             \
                       method{ format } format{ }              \
                       use_filesystem{ } filesystem{ ext4 }    \
                       mountpoint{ /boot }                     \
@@ -96,17 +95,17 @@ ubiquity partman-auto/expert_recipe string                    \
                       $lvmok{ } lv_name{ swap }               \
                       method{ swap } format{ }                \
               .                                               \
-              20000 20000 20000 ext4                          \
-                      $lvmok{ } lv_name{ root }               \
-                      method{ format } format{ }              \
-                      use_filesystem{ } filesystem{ ext4 }    \
-                      mountpoint{ / }                         \
-              .                                               \
               500 10000 1000000000 ext4                       \
                       $lvmok{ } lv_name{ home }               \
                       method{ format } format{ }              \
                       use_filesystem{ } filesystem{ ext4 }    \
                       mountpoint{ /home }                     \
+              .                                               \
+              20000 20000 20000 ext4                          \
+                      $lvmok{ } lv_name{ root }               \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext4 }    \
+                      mountpoint{ / }                         \
               .                                               \
 
 ### END CUSTOM PARTITIONING ###

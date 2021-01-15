@@ -51,16 +51,28 @@ if [ "${unrecognised_option}" != "0" ]; then
     exit
 fi
 
-mkisofs -D -r -V "AIO_MINT" -cache-inodes -J -l \
-	-b isolinux/isolinux.bin \
-	-c isolinux/boot.cat \
-	-no-emul-boot -boot-load-size 4 -boot-info-table \
-	-input-charset utf-8 \
-	-quiet \
-	-o "${target}" \
-	"${source}"
+mbr_bin="/usr/lib/ISOLINUX/isohdpfx.bin"
+if [ ! -f "${mbr_bin}" ]; then
+    echo "Unable to locate required file ${mbr_bin} not present on system"
+    echo "Perhaps try:"
+    echo " sudo apt-get install --no-install-recommends -y isolinux"
+    echo 
+fi
 
-isohybrid "${target}"
+xorriso -as mkisofs \
+        -isohybrid-mbr "${mbr_bin}" \
+        -c isolinux/boot.cat \
+        -b isolinux/isolinux.bin \
+        -no-emul-boot \
+        -boot-load-size 4 \
+        -boot-info-table \
+        -eltorito-alt-boot \
+        -e boot/grub/efi.img \
+        -no-emul-boot \
+        -isohybrid-gpt-basdat \
+        -o "${target}" \
+        "${source}"
+
 
 if [ "$?" = "0" ]; then
     echo "Unattended ISO: ${target}"
