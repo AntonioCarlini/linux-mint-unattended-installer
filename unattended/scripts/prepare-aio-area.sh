@@ -54,7 +54,6 @@ parse_cli()
 # exit the script is this fails for any reason.
 prepare_aio_repo()
 {
-    echo "prepare: ${aio_repo_present}"
     if [ ${aio_repo_present} -eq 0 ]; then
 	git clone "${aio_repo}" "${aio_area}"
 	result=$?
@@ -65,11 +64,11 @@ prepare_aio_repo()
     fi
 
     # Remove some text files from the repo that do not really belong on the ISO
-    rm LICENSE
-    rm README.md
+    rm "${aio_area}/LICENSE"
+    rm "${aio_area}/README.md"
 }
 
-# Display a message with instructions on how to use this procesure
+# Display a message with instructions on how to use this procedure
 usage()
 {
     echo "Usage: `basename "$0"` TBD"
@@ -83,6 +82,17 @@ check()
     # ${aio_area} must be empty if it exists
 
     # ${mountpoint} must be empty if it exists
+}
+
+# Download the r8168 ethernet driver and the dkms environment
+add_packages()
+{
+    mkdir "${aio_area}/unattended/packages"
+    ( \
+      cd "${aio_area}/unattended/packages"; \
+      apt-get download dkms; \
+      apt-get download r8168-dkms; \
+    )
 }
 
 aio_repo_present=0                                                       # If non-zero, the AIO git repo is already present and should not be cloned
@@ -112,11 +122,11 @@ mkdir -p "${source_iso_download_dir}"
 
 # Download the AIO repo to source area
 prepare_aio_repo
+add_packages
 
-# Download ISO (unless already present) and loop mount
+# Download specified Linux Mint ISO (unless already present) and loop mount
 wget -nc "${lm_download_url_prefix}/${lm_version}/linuxmint-${lm_version}-cinnamon-64bit.iso" -O "${source_iso_download_dir}/${source_iso_name}"
 mount -o ro,loop "${source_iso_download_dir}/${source_iso_name}" "${mountpoint}"
-echo "Mounted"
 
 # Copy ISO over scratch area, but do not overwite existing files (from the git AIO repo).
 # Do not specify any files from the source otherwise hidden directories (such as .disk) will be missed and the final ISO will not function correctly.
