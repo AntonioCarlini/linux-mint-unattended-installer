@@ -55,7 +55,7 @@ main_actions() {
     apt-get install -y --no-install-recommends ansible
 
     # Run suitable ansible scripts
-    style=`grep SYSTEM_CLASS /root/env.proc1`
+    style=`grep SYSTEM_CLASS /opt/unattended-install/env.proc1`
     export ${style}
     as_minimal=""
     as_vmbase="vmware-host.yml"
