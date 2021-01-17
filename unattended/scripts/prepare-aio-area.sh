@@ -84,14 +84,22 @@ check()
     # ${mountpoint} must be empty if it exists
 }
 
-# Download the r8168 ethernet driver and the dkms environment
+# Download the dkms debian package
 add_packages()
 {
     mkdir "${aio_area}/unattended/packages"
     ( \
       cd "${aio_area}/unattended/packages"; \
       apt-get download dkms; \
-      apt-get download r8168-dkms; \
+    )
+}
+
+add_repositories()
+{
+    mkdir "${aio_area}/unattended/repositories"
+    ( \
+      cd "${aio_area}/unattended/repositories"; \
+      git clone https://github.com/PyCoder/r8125-dkms \
     )
 }
 
@@ -123,6 +131,7 @@ mkdir -p "${source_iso_download_dir}"
 # Download the AIO repo to source area
 prepare_aio_repo
 add_packages
+add_repositories
 
 # Download specified Linux Mint ISO (unless already present) and loop mount
 wget -nc "${lm_download_url_prefix}/${lm_version}/linuxmint-${lm_version}-cinnamon-64bit.iso" -O "${source_iso_download_dir}/${source_iso_name}"

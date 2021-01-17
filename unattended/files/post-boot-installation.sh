@@ -27,6 +27,10 @@ main_actions() {
     echo "Running ${this_script}"
 
     echo "================================================================================"
+    echo "Preparing RTL8125 (via dkms)"
+    `dirname $0`/handle-r8125.sh /root/r8125-dkms
+
+    echo "================================================================================"
     echo "Performing apt update"
     apt-get update
 
