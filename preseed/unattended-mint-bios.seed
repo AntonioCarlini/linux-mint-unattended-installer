@@ -60,55 +60,8 @@ ubiquity partman/confirm_nooverwrite boolean true
 ubiquity partman/default_label string gpt
 ubiquity partman/mount_style select uuid
 
-### BEGIN CUSTOM PARTITIONING ###
-# 
 ubiquity partman-auto/choose_recipe select disk_layout
-#ubiquity partman-auto/expert_recipe_file string /cdrom/unattended/files/partitioning-recipe.txt
-#
-# /boot   255 MB
-# efi     128 MB
-# /        20 GB
-# /home   remaining free space
-#
-# The "free" partition is the "Reserved for BIOS" area.
-#
-ubiquity partman-auto/expert_recipe string                    \
-      disk_layout ::                                          \
-              1 1 1 fat32                                     \
-                      method{ biosgrub }                      \
-              .                                               \
-              522 100009 600 fat32                            \
-                      $primary{ }                             \
-                      bootable{ }                             \
-                      $iflabel{ gpt }                         \
-                      $reusemethod{ }                         \
-                      method{ efi } format{ }                 \
-                      mountpoint{ /boot/efi }                 \
-		      .                                       \
-              256 100008 256 ext4                             \
-                      $primary{ }                             \
-                      method{ format } format{ }              \
-                      use_filesystem{ } filesystem{ ext4 }    \
-                      mountpoint{ /boot }                     \
-              .                                               \
-              2000 2000 2000 linux-swap                       \
-                      $lvmok{ } lv_name{ swap }               \
-                      method{ swap } format{ }                \
-              .                                               \
-              500 10000 1000000000 ext4                       \
-                      $lvmok{ } lv_name{ home }               \
-                      method{ format } format{ }              \
-                      use_filesystem{ } filesystem{ ext4 }    \
-                      mountpoint{ /home }                     \
-              .                                               \
-              20000 20000 20000 ext4                          \
-                      $lvmok{ } lv_name{ root }               \
-                      method{ format } format{ }              \
-                      use_filesystem{ } filesystem{ ext4 }    \
-                      mountpoint{ / }                         \
-              .                                               \
-
-### END CUSTOM PARTITIONING ###
+ubiquity partman-auto/expert_recipe_file string /cdrom/unattended/files/partitioning-recipe-bios.txt
 
 # Locales
 # Find available locales in /etc/locale.gen
@@ -125,7 +78,8 @@ d-i clock-setup/ntp boolean true
 # User
 d-i passwd/user-fullname string Antonio Carlini
 ubiquity passwd/username string antonioc
-d-i passwd/user-password-crypted password $6$9npSgiXrPLALQOaG$ebsf0BjX1UPbbK7UNlfuo45fyCN7XqeGDXXiooY4aHpj2RIhWWagiITaWyMb22KIQDkqgp9QhdqSn7hY1PFsF1
+# password generated with 'mkpassword -m sha-512'
+d-i passwd/user-password-crypted password $6$eGEzVjCoX3qyVGc$x5U3AV/0xkvE22X1rzW7DzJn1RrLoyKPVJSg1YwsyULO8u3anPbBhCX7g1E3Ww1PaaGKmnFfa2FcJjRb3i5tI/
 d-i passwd/user-default-groups string adm audio cdrom dip lpadmin sudo plugdev sambashare video
 d-i passwd/root-login boolean false
 
@@ -134,7 +88,7 @@ d-i passwd/root-login boolean false
 d-i ubiquity/reboot boolean true
 
 # Network
-d-i netcfg/get_hostname string testuna
+d-i netcfg/get_hostname string testbios
 d-i netcfg/get_domain string flexbl.co.uk
 d-i netcfg/choose_interface select auto
 
@@ -158,6 +112,3 @@ ubiquity ubiquity/success_command string \
 	 strings –a /proc/1/environ > /target/opt/unattended-install/env.proc1; \
 	 in-target apt-get update; \
 	 in-target apt-get install -y --no-install-recommends openssh-server
-
-d-i preseed/early_command string touch /target/root/early_command_worked
-ubiquity ubiquity/early_command string touch /target/root/early_command_worked.ub

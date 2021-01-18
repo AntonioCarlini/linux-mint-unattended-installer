@@ -1,0 +1,26 @@
+disk_layout ::
+        1 1 1 fat32
+                method{ biosgrub }
+        .
+        256 100008 256 ext4
+                $primary{ }
+                method{ format } format{ }
+                use_filesystem{ } filesystem{ ext4 }
+                mountpoint{ /boot }
+        .
+        2000 2000 2000 linux-swap
+        $lvmok{ } lv_name{ swap }
+                method{ swap } format{ }
+        .
+        500 10000 1000000000 ext4
+                $lvmok{ } lv_name{ home }
+                method{ format } format{ }
+                use_filesystem{ } filesystem{ ext4 }
+                mountpoint{ /home }
+        .
+        20000 20000 20000 ext4
+                $lvmok{ } lv_name{ root }
+                method{ format } format{ }
+                use_filesystem{ } filesystem{ ext4 }
+                mountpoint{ / }
+        .

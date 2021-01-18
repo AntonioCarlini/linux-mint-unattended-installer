@@ -1,0 +1,114 @@
+# Helpful partitioning info: https://cptyesterday.wordpress.com/2012/07/20/get-expert_recipe-mdraid-lvm-gpt-and-grub2-playing-together-on-ubuntu-lucid-and-debian-squeeze/
+
+# Select the language
+d-i languagechooser/language-name string English
+d-i countrychooser/shortlist string UK
+d-i debian-installer/language string en
+d-i debian-installer/country string UK
+
+# Console
+d-i console-setup/ask_detect boolean false
+d-i console-setup/layoutcode string UK
+
+# Keyboard layout
+d-i keyboard-configuration/xkb-keymap string gb
+d-i keyboard-configuration/layoutcode string gb
+
+# Partitioning
+# WARNING: THIS IS TEMPORARY. IT MAY DELETE EXISTING DATA. 
+
+d-i partman-auto/disk string /dev/sda
+d-i partman-auto/method string regular
+d-i partman-auto/purge_lvm_from_device boolean true
+d-i partman-basicfilesystems/choose_label string gpt
+d-i partman-basicfilesystems/default_label string gpt
+d-i partman-lvm/confirm boolean true
+d-i partman-lvm/confirm_nooverwrite boolean true
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-lvm/device_remove_lvm_span boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-partitioning partman-partitioning/choose_label select gpt
+d-i partman-partitioning/choose_label string gpt
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman-partitioning/default_label string gpt
+d-i partman/choose_label string gpt
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+d-i partman/default_label string gpt
+d-i partman/mount_style select uuid
+
+ubiquity partman-auto-lvm/guided_size string max
+ubiquity partman-auto/disk string /dev/sda
+ubiquity partman-auto/method string regular
+ubiquity partman-auto/purge_lvm_from_device boolean true
+ubiquity partman-basicfilesystems/choose_label string gpt
+ubiquity partman-basicfilesystems/default_label string gpt
+ubiquity partman-lvm/confirm boolean true
+ubiquity partman-lvm/confirm_nooverwrite boolean true
+ubiquity partman-lvm/device_remove_lvm boolean true
+ubiquity partman-lvm/device_remove_lvm_span boolean true
+ubiquity partman-md/device_remove_md boolean true
+ubiquity partman-partitioning partman-partitioning/choose_label select gpt
+ubiquity partman-partitioning/choose_label string gpt
+ubiquity partman-partitioning/confirm_write_new_label boolean true
+ubiquity partman-partitioning/default_label string gpt
+ubiquity partman/choose_label string gpt
+ubiquity partman/choose_partition select finish
+ubiquity partman/confirm boolean true
+ubiquity partman/confirm_nooverwrite boolean true
+ubiquity partman/default_label string gpt
+ubiquity partman/mount_style select uuid
+
+ubiquity partman-auto/choose_recipe select disk_layout
+ubiquity partman-auto/expert_recipe_file string /cdrom/unattended/files/partitioning-recipe-efi.txt
+
+# Locales
+# Find available locales in /etc/locale.gen
+# Post-install, check on locales using: locale -a
+d-i debian-installer/locale string en_GB.utf-8
+d-i localechooser/supported-locales string ja_JP.utf-8, it_IT.utf-8
+
+# Timezone setup
+d-i clock-setup/utc-auto boolean true
+d-i clock-setup/utc boolean true
+d-i time/zone string Europe/London
+d-i clock-setup/ntp boolean true
+
+# User
+d-i passwd/user-fullname string Antonio Carlini
+ubiquity passwd/username string antonioc
+# password generated with 'mkpassword -m sha-512'
+d-i passwd/user-password-crypted password $6$eGEzVjCoX3qyVGc$x5U3AV/0xkvE22X1rzW7DzJn1RrLoyKPVJSg1YwsyULO8u3anPbBhCX7g1E3Ww1PaaGKmnFfa2FcJjRb3i5tI/
+d-i passwd/user-default-groups string adm audio cdrom dip lpadmin sudo plugdev sambashare video
+d-i passwd/root-login boolean false
+
+# Reboot at the end of the install
+# TODO
+d-i ubiquity/reboot boolean true
+
+# Network
+d-i netcfg/get_hostname string testefi
+d-i netcfg/get_domain string flexbl.co.uk
+d-i netcfg/choose_interface select auto
+
+# Apt: Packages, Mirrors, Image
+d-i mirror/country string UK
+d-i apt-setup/multiverse boolean true
+d-i apt-setup/restricted boolean true
+d-i apt-setup/universe boolean true
+
+# Run further commands after the main installation has been performed.
+# Do this by setting up a systemd service to invoke a shell script after the next reboot.
+# In addition install openssh-server to ensure that there is easy access to the system.
+# Store the env for the systemd process in /root/env.proc1 so the post reboot installer has access to the SYSTEM_CLASS variable on the kernel command line
+ubiquity ubiquity/success_command string \
+	 mkdir -p /target/opt/unattended-install ; \
+ 	 cp /cdrom/unattended/scripts/*.sh /target/opt/unattended-install/. ; \
+	 cp /cdrom/unattended/files/unattended-install.service /target/etc/systemd/system/. ;\
+ 	 cp -rT /cdrom/unattended/repositories/r8125-dkms /target/root/r8125-dkms ;\
+	 /cdrom/unattended/scripts/handle-r8125.sh /cdrom/unattended/repositories/r8125-dkms 2>&1 >> /target/root/handle-r8125.script.output ; \
+	 ln -s /target/etc/systemd/system/unattended-install.service /target/etc/systemd/system/multi-user.target.wants/unattended-install.service ; \
+	 strings –a /proc/1/environ > /target/opt/unattended-install/env.proc1; \
+	 in-target apt-get update; \
+	 in-target apt-get install -y --no-install-recommends openssh-server
