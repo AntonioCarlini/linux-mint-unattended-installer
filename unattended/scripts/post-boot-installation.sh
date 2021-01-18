@@ -28,7 +28,7 @@ main_actions() {
 
     echo "================================================================================"
     echo "Preparing RTL8125 (via dkms)"
-    `dirname $0`/handle-r8125.sh /root/r8125-dkms
+    "$(dirname "$0")/handle-r8125.sh" /root/r8125-dkms
 
     echo "================================================================================"
     echo "Performing apt update"
@@ -44,7 +44,7 @@ main_actions() {
     echo "Installing packages: [${PACKAGES}]"
     # Note: It has to be ${PACKAGES} here without double quotes otherwise apt-get treats
     # the whole string as a name for one package.
-    apt-get install -y --no-install-recommends ${PACKAGES}
+    apt-get install -y --no-install-recommends "${PACKAGES}"
 
     echo "================================================================================"
     echo "Downloading ansible playbooks"
@@ -55,17 +55,20 @@ main_actions() {
     apt-get install -y --no-install-recommends ansible
 
     # Run suitable ansible scripts
-    style=`grep SYSTEM_CLASS /opt/unattended-install/env.proc1`
-    export ${style}
+    style=$(grep SYSTEM_CLASS /opt/unattended-install/env.proc1 | awk -F= '{print $2}')
+    export SYSTEM_CLASS="${style}"
     as_minimal=""
     as_vmbase="vmware-host.yml"
     as_workstation="work-station.yml"
+    export as_minimal       # keep shellcheck happy
+    export as_vmbase        # keep shellcheck happy
+    export as_workstation   # keep shellcheck happy
     v_name="as_${SYSTEM_CLASS}"
     ANSIBLE_SCRIPTS="${!v_name}"
     if [ -n "${ANSIBLE_SCRIPTS}" ]
     then
 	echo "Running ansible scripts: [${ANSIBLE_SCRIPTS}]"
-        run_ansible_playbooks ${ANSIBLE_SCRIPTS}
+        run_ansible_playbooks "${ANSIBLE_SCRIPTS}"
     else
 	echo "NO ansible scripts to run for [${SYSTEM_CLASS}]"
     fi

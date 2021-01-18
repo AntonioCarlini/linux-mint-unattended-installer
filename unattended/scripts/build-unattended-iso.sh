@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This script builds a bootable ISO. 
 # Options:
@@ -9,26 +9,38 @@
 #    If the CDW is not the root of the copied LM ISO file then mkisofs will probably fail.
 #
 # --target TARGET
-#    Specifies the filename of the generated unattended ISO
-
-# NOTE: this is currently a work-in-progress
+#    Specifies the filename of the generated unattended ISO.
+#
+# --help
+#    Displays usage information.
 
 usage()
 {
-    echo "Usage: `basename "$0"` [--source SOURCE] [--target TARGET]"
-    echo " SOURCE: the directory that contains the files that should be built into an ISO (defaults to the current directory)"
-    echo " TARGET: the filename of the ISO to create (defaults to /tmp/mint-aio.iso)"
+    echo "Usage: $(basename "$0") [--source SOURCE] [--target TARGET] [--help]"
+    echo " --source SOURCE"
+    echo "       SOURCE specifies the directory that contains the files that should be built into an unattended install ISO. Defaults to the current directory"
+    echo
+    echo " --target TARGET"
+    echo "       build the unattended install ISO at TARGET. Defaults to /tmp/mint-aio.iso"
+    echo
+    echo " --help"
+    echo "       print this usage information and exit."
+    echo
 }
 
-original_command_line="$@"                    # save original command line so it can be printed later (after cli parsing changes the args)
+original_command_line="$*"                    # save original command line so it can be printed later (after cli parsing changes the args)
 
-source="`pwd`"
+source="$(pwd)"
 target="/tmp/mint-aio.iso"
 
 unrecognised_option=0
 while [ $# -gt 0 ]
 do
     case "$1" in
+	-h|--help)
+	    usage
+	    exit 0
+	    ;;
 	-s|--source)
 	    source="$2"
 	    shift; shift # remove arg and value
@@ -59,7 +71,7 @@ if [ ! -f "${mbr_bin}" ]; then
     echo 
 fi
 
-xorriso -as mkisofs \
+if xorriso -as mkisofs \
         -isohybrid-mbr "${mbr_bin}" \
         -c isolinux/boot.cat \
         -b isolinux/isolinux.bin \
@@ -71,9 +83,7 @@ xorriso -as mkisofs \
         -no-emul-boot \
         -isohybrid-gpt-basdat \
         -o "${target}" \
-        "${source}"
-
-
-if [ "$?" = "0" ]; then
+        "${source}"; then
+    # Tell the user where the ISO has been put
     echo "Unattended ISO: ${target}"
 fi
