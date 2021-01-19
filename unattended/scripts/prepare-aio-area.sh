@@ -18,7 +18,9 @@
 # Parse the permitted command line arguments.
 parse_cli()
 {
+    original_command_line="$*"                    # save original command line so it can be printed later (after cli parsing changes the args)
     unrecognised_option=0
+
     while [ $# -gt 0 ]
     do
 	case "$1" in
@@ -89,7 +91,7 @@ add_packages()
 {
     mkdir "${aio_area}/unattended/packages"
     ( \
-      cd "${aio_area}/unattended/packages"; \
+      cd "${aio_area}/unattended/packages" || return; \
       apt-get download dkms; \
     )
 }
@@ -98,7 +100,7 @@ add_repositories()
 {
     mkdir "${aio_area}/unattended/repositories"
     ( \
-      cd "${aio_area}/unattended/repositories"; \
+      cd "${aio_area}/unattended/repositories" || return; \
       git clone https://github.com/PyCoder/r8125-dkms \
     )
 }
@@ -118,7 +120,7 @@ parse_cli "$@"
 
 source_iso_download_dir="${work_root}/iso"
 mountpoint="${work_root}/mnt"
-aio_iso_name="${work_root}/mint-aio.iso"
+# aio_iso_name="${work_root}/mint-aio.iso"  # currently unused
 
 # Check environment - will abort if any error is found
 check
@@ -134,7 +136,11 @@ add_packages
 add_repositories
 
 # Download specified Linux Mint ISO (unless already present) and loop mount
-wget -nc "${lm_download_url_prefix}/${lm_version}/linuxmint-${lm_version}-cinnamon-64bit.iso" -O "${source_iso_download_dir}/${source_iso_name}"
+if [ "$iso_present" = "1" ]; then
+    echo "Skipping ISO download, as requested on the command line"
+else
+    wget -nc "${lm_download_url_prefix}/${lm_version}/linuxmint-${lm_version}-cinnamon-64bit.iso" -O "${source_iso_download_dir}/${source_iso_name}"
+fi
 mount -o ro,loop "${source_iso_download_dir}/${source_iso_name}" "${mountpoint}"
 
 # Copy ISO over scratch area, but do not overwite existing files (from the git AIO repo).
