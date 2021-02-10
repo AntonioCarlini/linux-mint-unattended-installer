@@ -6,10 +6,10 @@
 # --source SOURCE
 #    Specifies that SOURCE is root directory to be used when building the unattended ISO.
 #    Defaults to using the current working directory as the source.
-#    If the CDW is not the root of the copied LM ISO file then mkisofs will probably fail.
+#    If the CWD is not the root of the copied LM ISO file then mkisofs will probably fail.
 #
 # --target TARGET
-#    Specifies the filename of the generated unattended ISO.
+#    Specifies the filename (and path) of the generated unattended ISO.
 #
 # --help
 #    Displays usage information.
@@ -21,7 +21,7 @@ usage()
     echo "       SOURCE specifies the directory that contains the files that should be built into an unattended install ISO. Defaults to the current directory"
     echo
     echo " --target TARGET"
-    echo "       build the unattended install ISO at TARGET. Defaults to /tmp/mint-aio.iso"
+    echo "       build the unattended install ISO at TARGET. Defaults to /tmp/mint-unattended.iso"
     echo
     echo " --help"
     echo "       print this usage information and exit."
@@ -31,7 +31,7 @@ usage()
 original_command_line="$*"                    # save original command line so it can be printed later (after cli parsing changes the args)
 
 source="$(pwd)"
-target="/tmp/mint-aio.iso"
+target="/tmp/mint-unattended.iso"
 
 unrecognised_option=0
 while [ $# -gt 0 ]
