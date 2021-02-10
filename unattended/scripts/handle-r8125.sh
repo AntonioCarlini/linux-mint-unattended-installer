@@ -39,4 +39,4 @@ done
 
 # Give everything a chance to settle down before finishing
 sleep 4
-echo "$((basename $0)) finished"
+echo "$( basename "$0" ) finished"

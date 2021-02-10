@@ -40,10 +40,12 @@
 # Parse the permitted command line arguments.
 parse_cli()
 {
+    original_command_line="$*"                    # save original command line so it can be printed later (after cli parsing changes the args)
     unrecognised_option=0
+
     while [ $# -gt 0 ]
     do
-	case "$1" in
+	  case "$1" in
 	    -v|--verbose)
 		verbose=1
 		shift # remove arg
@@ -76,10 +78,11 @@ parse_cli()
 	esac
     done
 
-    if [ "${unrecognised_option}" != "0" ]; then
-	echo "At least one unrecognised option was seen: ${original_command_line}"
-	usage
-	exit 2
+    
+	  if [ "${unrecognised_option}" != "0" ]; then
+	    echo "At least one unrecognised option was seen: ${original_command_line}"
+	    usage
+	    exit 2
     fi
 
 }
@@ -137,7 +140,7 @@ add_packages()
 {
     mkdir "${uai_area}/unattended/packages"
     ( \
-      cd "${uai_area}/unattended/packages"; \
+      cd "${uai_area}/unattended/packages" || return; \
       apt-get download dkms; \
     )
 }
@@ -146,7 +149,7 @@ add_repositories()
 {
     mkdir "${uai_area}/unattended/repositories"
     ( \
-      cd "${uai_area}/unattended/repositories"; \
+      cd "${uai_area}/unattended/repositories" || return; \
       git clone https://github.com/PyCoder/r8125-dkms \
     )
 }
