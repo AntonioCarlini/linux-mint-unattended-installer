@@ -199,7 +199,7 @@ perform_update=0                                                        # If non
 uai_repo="https://github.com/AntonioCarlini/linux-mint-unattended-installer"         
 lm_download_url_prefix="http://www.mirrorservice.org/sites/www.linuxmint.com/pub/linuxmint.com/stable/"
 source_iso_name="linuxmint.iso"
-lm_version="20.1"
+lm_version="20.3"
 
 work_root=""
 
