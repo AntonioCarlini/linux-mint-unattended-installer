@@ -10,7 +10,7 @@ disk_layout ::
                 method{ efi } format{ }
                 mountpoint{ /boot/efi }
 		      .
-        256 100008 256 ext4
+        580 100008 580 ext4
                 $primary{ }
                 method{ format } format{ }
                 use_filesystem{ } filesystem{ ext4 }
