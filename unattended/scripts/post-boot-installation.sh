@@ -31,6 +31,10 @@ main_actions() {
     "$(dirname "$0")/handle-r8125.sh" /root/r8125-dkms
 
     echo "================================================================================"
+    echo "Preparing RTL8821CE (via dkms)"
+    "$(dirname "$0")/handle-rtl8821ce.sh" /root/packages
+
+    echo "================================================================================"
     echo "Performing apt update"
     apt-get update
 

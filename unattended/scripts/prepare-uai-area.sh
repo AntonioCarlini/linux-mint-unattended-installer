@@ -139,10 +139,12 @@ check()
 # Download the dkms debian package
 add_packages()
 {
+    echo "ADD_PKG"
     mkdir -p "${uai_area}/unattended/packages"
     ( \
       cd "${uai_area}/unattended/packages" || return; \
       apt-get download dkms; \
+      apt-get download rtl8821ce-dkms; \
     )
 }
 
@@ -180,7 +182,7 @@ find_work_root()
 		"${putative_root}"/iso) ;;
 
 		*)
-		    exit 1
+		    echo "work_root already present: exiting"
 	    esac
 	done
     fi
@@ -212,6 +214,8 @@ if [ -z "${work_root}" ]; then
     echo "Either specify a work_root or run within the env subriectory of a previously initialised work_root"
     exit 1
 fi
+
+
 
 # Set variables that might depend on the arguments passed in by the CLI
 source_iso_download_dir="${work_root}/iso"

@@ -107,6 +107,8 @@ ubiquity ubiquity/success_command string \
  	 cp /cdrom/unattended/scripts/*.sh /target/opt/unattended-install/. ; \
 	 cp /cdrom/unattended/files/unattended-install.service /target/etc/systemd/system/. ;\
  	 cp -rT /cdrom/unattended/repositories/r8125-dkms /target/root/r8125-dkms ;\
+	 mkdir -p /target/root/packages ;\
+	  cp  /cdrom/unattended/packages/*.deb /target/root/packages ;\
 	 /cdrom/unattended/scripts/handle-r8125.sh /cdrom/unattended/repositories/r8125-dkms 2>&1 >> /target/root/handle-r8125.script.output ; \
 	 ln -s /target/etc/systemd/system/unattended-install.service /target/etc/systemd/system/multi-user.target.wants/unattended-install.service ; \
 	 strings –a /proc/1/environ > /target/opt/unattended-install/env.proc1; \
