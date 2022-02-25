@@ -21,69 +21,77 @@ usage()
     echo "       SOURCE specifies the directory that contains the files that should be built into an unattended install ISO. Defaults to the current directory"
     echo
     echo " --target TARGET"
-    echo "       build the unattended install ISO at TARGET. Defaults to /tmp/mint-unattended.iso"
+    echo "       build the unattended install ISO at TARGET. Defaults to ${target_iso}"
     echo
     echo " --help"
     echo "       print this usage information and exit."
     echo
 }
 
-original_command_line="$*"                    # save original command line so it can be printed later (after cli parsing changes the args)
+# This is the entry point for the script
+main()
+{
+    source "$(dirname 0)/config.cfg"
 
-source="$(pwd)"
-target="/tmp/mint-unattended.iso"
+    original_command_line="$*"                    # save original command line so it can be printed later (after cli parsing changes the args)
 
-unrecognised_option=0
-while [ $# -gt 0 ]
-do
-    case "$1" in
-	-h|--help)
-	    usage
-	    exit 0
-	    ;;
-	-s|--source)
-	    source="$2"
-	    shift; shift # remove arg and value
-	    ;;
-	-t|--target)
-	    target="$2"
-	    shift; shift # remove arg and value
-	    ;;
-	*) # unknown option
-	    echo "Unrecognised option: [$1]"
-	    shift # remove unrecognised option
-	    unrecognised_option=1
-	    ;;
-    esac
-done
+    source="$(pwd)"
 
-if [ "${unrecognised_option}" != "0" ]; then
-    echo "At least one unrecognised option was seen: ${original_command_line}"
-    usage
-    exit
-fi
+    unrecognised_option=0
+    while [ $# -gt 0 ]
+    do
+	case "$1" in
+	    -h|--help)
+		usage
+		exit 0
+		;;
+	    -s|--source)
+		source="$2"
+		shift; shift # remove arg and value
+		;;
+	    -t|--target)
+		target_iso="$2"
+		shift; shift # remove arg and value
+		;;
+	    *) # unknown option
+		echo "Unrecognised option: [$1]"
+		shift # remove unrecognised option
+		unrecognised_option=1
+		;;
+	esac
+    done
 
-mbr_bin="/usr/lib/ISOLINUX/isohdpfx.bin"
-if [ ! -f "${mbr_bin}" ]; then
-    echo "Unable to locate required file ${mbr_bin} not present on system"
-    echo "Perhaps try:"
-    echo " sudo apt-get install --no-install-recommends -y isolinux"
-    echo 
-fi
+    if [ "${unrecognised_option}" != "0" ]; then
+	echo "At least one unrecognised option was seen: ${original_command_line}"
+	usage
+	exit
+    fi
 
-if xorriso -as mkisofs \
-        -isohybrid-mbr "${mbr_bin}" \
-        -c isolinux/boot.cat \
-        -b isolinux/isolinux.bin \
-        -no-emul-boot \
-        -boot-load-size 4 \
-        -boot-info-table \
-        -eltorito-alt-boot \
-        -e boot/grub/efi.img \
-        -no-emul-boot \
-        -isohybrid-gpt-basdat \
-        -o "${target}" \
-        "${source}"; then
-    # Tell the user where the ISO has been put
-    echo "Unattended ISO: ${target}"
-fi
+    mbr_bin="/usr/lib/ISOLINUX/isohdpfx.bin"
+    if [ ! -f "${mbr_bin}" ]; then
+	echo "Unable to locate required file ${mbr_bin} not present on system"
+	echo "Perhaps try:"
+	echo " sudo apt-get install --no-install-recommends -y isolinux"
+	echo 
+    fi
+
+    if xorriso -as mkisofs \
+               -isohybrid-mbr "${mbr_bin}" \
+               -c isolinux/boot.cat \
+               -b isolinux/isolinux.bin \
+               -no-emul-boot \
+               -boot-load-size 4 \
+               -boot-info-table \
+               -eltorito-alt-boot \
+               -e boot/grub/efi.img \
+               -no-emul-boot \
+               -isohybrid-gpt-basdat \
+               -o "${target_iso}" \
+               "${source}"; then
+	# Tell the user where the ISO has been put
+	echo "Unattended ISO: ${target}"
+    fi
+}
+
+# Invoke the main script entry point
+main()

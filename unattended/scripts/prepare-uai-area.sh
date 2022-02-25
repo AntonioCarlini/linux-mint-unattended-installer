@@ -194,64 +194,65 @@ find_work_root()
 #+
 # The main script starts here
 #-
-verbose=0                                                               # Keep verbosity low
-uai_repo_present=0                                                       # If non-zero, the unattended install git repo is already present and should not be cloned
-perform_cleanup=0                                                       # If non-zero, clean down intermediate results
-perform_update=0                                                        # If non-zero, update where required
-uai_repo="https://github.com/AntonioCarlini/linux-mint-unattended-installer"         
-lm_download_url_prefix="http://www.mirrorservice.org/sites/www.linuxmint.com/pub/linuxmint.com/stable/"
-source_iso_name="linuxmint.iso"
-lm_version="20.3"
+main()
+{
+    source "$(dirname 0)/config.cfg"
+    verbose=0                                                               # Keep verbosity low
+    uai_repo_present=0                                                      # If non-zero, the unattended install git repo is already present and should not be cloned
+    perform_cleanup=0                                                       # If non-zero, clean down intermediate results
+    perform_update=0                                                        # If non-zero, update where required
 
-work_root=""
+    work_root=""
 
-parse_cli "$@"             # Parse cli to allow overrides
+    parse_cli "$@"             # Parse cli to allow overrides
 
-find_work_root             # Find work_root
+    find_work_root             # Find work_root
 
-if [ -z "${work_root}" ]; then
-    echo "No work_root found or specified."
-    echo "Either specify a work_root or run within the env subriectory of a previously initialised work_root"
-    exit 1
-fi
+    if [ -z "${work_root}" ]; then
+	echo "No work_root found or specified."
+	echo "Either specify a work_root or run within the env subriectory of a previously initialised work_root"
+	exit 1
+    fi
 
+    # Set variables that might depend on the arguments passed in by the CLI
+    source_iso_download_dir="${work_root}/iso"
+    mountpoint="${work_root}/mnt"
+    uai_iso_name="${work_root}/mint-unattended.iso"
+    uai_area="${work_root}/env"
 
+    # Check environment - will abort if any error is found
+    check
 
-# Set variables that might depend on the arguments passed in by the CLI
-source_iso_download_dir="${work_root}/iso"
-mountpoint="${work_root}/mnt"
-uai_iso_name="${work_root}/mint-unattended.iso"
-uai_area="${work_root}/env"
+    # Create the necessary directories, if required
+    mkdir -p "${uai_area}"
+    mkdir -p "${mountpoint}"
+    mkdir -p "${source_iso_download_dir}"
 
-# Check environment - will abort if any error is found
-check
+    prepare_unattended_install_repo "${uai_repo_present}" "${perform_update}"      # Download the unattended install repo to source area
+    add_packages                                                                   # Download packages
+    add_repositories                                                               # Download 3rd party repositories
 
-# Create the necessary directories, if required
-mkdir -p "${uai_area}"
-mkdir -p "${mountpoint}"
-mkdir -p "${source_iso_download_dir}"
+    # Download specified Linux Mint ISO (unless already present) and loop mount
+    wget -nc "${lm_download_url_prefix}/${lm_version}/linuxmint-${lm_version}-cinnamon-64bit.iso" -O "${source_iso_download_dir}/${source_iso_name}"
+    sudo mount -o ro,loop "${source_iso_download_dir}/${source_iso_name}" "${mountpoint}"
 
-prepare_unattended_install_repo "${uai_repo_present}" "${perform_update}"      # Download the unattended install repo to source area
-add_packages                                                                   # Download packages
-add_repositories                                                               # Download 3rd party repositories
+    # Copy ISO over scratch area, but do not overwite existing files (from the git unattended install repo).
+    # Do not specify any files from the source otherwise hidden directories (such as .disk) will be missed and the final ISO will not function correctly.
+    # (An alternative would be some kind of union mount)
+    cp -v -nRT "${mountpoint}" "${uai_area}"
 
-# Download specified Linux Mint ISO (unless already present) and loop mount
-wget -nc "${lm_download_url_prefix}/${lm_version}/linuxmint-${lm_version}-cinnamon-64bit.iso" -O "${source_iso_download_dir}/${source_iso_name}"
-sudo mount -o ro,loop "${source_iso_download_dir}/${source_iso_name}" "${mountpoint}"
+    # Unmount the source ISO
+    sudo umount "${mountpoint}"
 
-# Copy ISO over scratch area, but do not overwite existing files (from the git unattended install repo).
-# Do not specify any files from the source otherwise hidden directories (such as .disk) will be missed and the final ISO will not function correctly.
-# (An alternative would be some kind of union mount)
-cp -v -nRT "${mountpoint}" "${uai_area}"
+    # Build the pre-seeded ISO (TODO)
+    # "${uai_area}"/unattended/scripts/build-unattended-iso.sh --source "${uai_area}" --target "${uai_iso_name}"
 
-# Unmount the source ISO
-sudo umount "${mountpoint}"
+    # Cleanup.
+    if [ ${perform_cleanup} -ne 0 ]; then
+	rmdir "${mountpoint}"
+	rmdir "${source_iso_download_dir}"
+    fi
+}
 
-# Build the pre-seeded ISO (TODO)
-# "${uai_area}"/unattended/scripts/build-unattended-iso.sh --source "${uai_area}" --target "${uai_iso_name}"
-
-# Cleanup.
-if [ ${perform_cleanup} -ne 0 ]; then
-    rmdir "${mountpoint}"
-    rmdir "${source_iso_download_dir}"
-fi
+# Invoke the script main entry point
+main()

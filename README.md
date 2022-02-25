@@ -11,6 +11,7 @@ This is how to build an unattended install based on [Linux Mint 20.3](https://ww
         wget https://raw.githubusercontent.com/AntonioCarlini/linux-mint-unattended-installer/master/unattended/scripts/prepare-uai-area.sh
      
      
+- If necessary adjust any options in the [configuration file](https://github.com/AntonioCarlini/linux-mint-unattended-installer/blob/master/unattended/scripts/config.cfg)
 
 - Invoke the [prepare script](https://github.com/AntonioCarlini/linux-mint-unattended-installer/blob/master/unattended/scripts/prepare-uai-area.sh):
 
