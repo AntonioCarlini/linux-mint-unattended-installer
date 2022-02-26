@@ -4,24 +4,21 @@ Note: this is still a WIP so the instructions may be out of date!
 
 This is how to build an unattended install based on [Linux Mint 20.3](https://www.linuxmint.com/edition.php?id=292) from scratch.
 
-- Prepare a work area and grab the [prepare script](https://github.com/AntonioCarlini/linux-mint-unattended-installer/blob/master/unattended/scripts/prepare-uai-area.sh).
+- Clone the repository and cd to the repository root.
 
-        mkdir work_area
-        cd work_area
-        wget https://raw.githubusercontent.com/AntonioCarlini/linux-mint-unattended-installer/master/unattended/scripts/prepare-uai-area.sh
+        git clone https://github.com/AntonioCarlini/linux-mint-unattended-installer/ uai
+        cd uai
      
      
-- If necessary adjust any options in the [configuration file](https://github.com/AntonioCarlini/linux-mint-unattended-installer/blob/master/unattended/scripts/config.cfg)
+- If necessary adjust any options in the [configuration file](https://github.com/AntonioCarlini/linux-mint-unattended-installer/blob/master/config.cfg)
 
-- Invoke the [prepare script](https://github.com/AntonioCarlini/linux-mint-unattended-installer/blob/master/unattended/scripts/prepare-uai-area.sh):
+- Invoke the [prepare script](https://github.com/AntonioCarlini/linux-mint-unattended-installer/blob/master/prepare-uai-area.sh):
 
-        chmod a+x prepare-uai-area.sh
-        ./prepare-uai-area.sh --work-root .
+        ./prepare-uai-area.sh
 
 - Invoke the script to build the required ISO file. Note that it is currently necessary to `cd` to the `env` directory first:
 
-        cd env
-        unattended/scripts/build-unattended-iso.sh
+        ./build-unattended-iso.sh
 
 The result will be built as: `/tmp/mint-unattended.iso`.
 

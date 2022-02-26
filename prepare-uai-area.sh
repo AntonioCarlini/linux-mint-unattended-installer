@@ -129,7 +129,7 @@ usage()
 # Verify that the requested environment appears to be valid
 check()
 {
-    echo "TODO: Perform checks"
+    echo "Perform checks"
 
     # ${uai_area} must be empty if it exists
 
@@ -139,7 +139,7 @@ check()
 # Download the dkms debian package
 add_packages()
 {
-    echo "ADD_PKG"
+    echo "Downloading Debian packages"
     mkdir -p "${uai_area}/unattended/packages"
     ( \
       cd "${uai_area}/unattended/packages" || return; \
@@ -150,6 +150,7 @@ add_packages()
 
 add_repositories()
 {
+    echo "Cloning repositories"
     mkdir -p "${uai_area}/unattended/repositories"
     ( \
       cd "${uai_area}/unattended/repositories" || return; \
@@ -173,19 +174,8 @@ find_work_root()
        return 1
     fi
 
-    if local git_top=$(git rev-parse --show-toplevel 2> /dev/null); then
-	local putative_root=$(cd "${git_top}/.."; pwd)
-	for file in "${putative_root}"/*; do
-	    case "${file}" in
-		"${putative_root}"/env) ;;
-		"${putative_root}"/mnt) ;;
-		"${putative_root}"/iso) ;;
-
-		*)
-		    echo "work_root already present: exiting"
-	    esac
-	done
-    fi
+    local putative_root=$(cd "${git_top}"; pwd)
+    
 		    
     # If we get this far, then we have our work root
     work_root="${putative_root}"
@@ -198,10 +188,11 @@ main()
 {
     source "$(dirname 0)/config.cfg"
     verbose=0                                                               # Keep verbosity low
-    uai_repo_present=0                                                      # If non-zero, the unattended install git repo is already present and should not be cloned
+    uai_repo_present=1                                                      # If non-zero, the unattended install git repo is already present and should not be cloned
     perform_cleanup=0                                                       # If non-zero, clean down intermediate results
     perform_update=0                                                        # If non-zero, update where required
 
+    git_top=$(git rev-parse --show-toplevel 2> /dev/null)                   # This is the root of the git repository
     work_root=""
 
     parse_cli "$@"             # Parse cli to allow overrides
@@ -215,10 +206,10 @@ main()
     fi
 
     # Set variables that might depend on the arguments passed in by the CLI
-    source_iso_download_dir="${work_root}/iso"
-    mountpoint="${work_root}/mnt"
-    uai_iso_name="${work_root}/mint-unattended.iso"
-    uai_area="${work_root}/env"
+    source_iso_download_dir="${work_root}/bin/iso"                                     # The original Linux Mint ISO should be here
+    mountpoint="${work_root}/bin/mnt"                                                  # The mountpoint for the loopback mount of the Linux Mint ISO
+    uai_iso_name="${work_root}/bin/mint-unattended.iso"                                # Seemingly unused 
+    uai_area="${work_root}/bin/uai"                                                    # The files that make up the final UAI ISO
 
     # Check environment - will abort if any error is found
     check
@@ -232,27 +223,38 @@ main()
     add_packages                                                                   # Download packages
     add_repositories                                                               # Download 3rd party repositories
 
+    # Copy the UAI github data to the staging area
+    echo "Copying repository data into the staging area"
+    for tree in boot/grub isolinux preseed unattended
+    do
+	mkdir -p "${uai_area}/${tree}"
+	cp -v -nRT "${git_top}/${tree}" "${uai_area}/${tree}"
+    done
+    find bin -name ".gitignore" | xargs -i rm -v {}                          # Clear away any unnecessary .gitignore files
+    
     # Download specified Linux Mint ISO (unless already present) and loop mount
+    echo "Download the Linux Mint ISO"
     wget -nc "${lm_download_url_prefix}/${lm_version}/linuxmint-${lm_version}-cinnamon-64bit.iso" -O "${source_iso_download_dir}/${source_iso_name}"
+    echo "Loop mount the Linux Mint ISO"
     sudo mount -o ro,loop "${source_iso_download_dir}/${source_iso_name}" "${mountpoint}"
 
     # Copy ISO over scratch area, but do not overwite existing files (from the git unattended install repo).
     # Do not specify any files from the source otherwise hidden directories (such as .disk) will be missed and the final ISO will not function correctly.
     # (An alternative would be some kind of union mount)
-    cp -v -nRT "${mountpoint}" "${uai_area}"
+    echo "Copy ISO contents to staging area"
+    cp -nRT "${mountpoint}" "${uai_area}"
 
     # Unmount the source ISO
     sudo umount "${mountpoint}"
 
-    # Build the pre-seeded ISO (TODO)
-    # "${uai_area}"/unattended/scripts/build-unattended-iso.sh --source "${uai_area}" --target "${uai_iso_name}"
 
     # Cleanup.
     if [ ${perform_cleanup} -ne 0 ]; then
+	echo "Cleaning up"	
 	rmdir "${mountpoint}"
 	rmdir "${source_iso_download_dir}"
     fi
 }
 
 # Invoke the script main entry point
-main()
+main

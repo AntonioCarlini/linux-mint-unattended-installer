@@ -35,8 +35,8 @@ main()
 
     original_command_line="$*"                    # save original command line so it can be printed later (after cli parsing changes the args)
 
-    source="$(pwd)"
-
+    uai_area="$(dirname $0)/bin/uai"                                                    # The files that make up the final UAI ISO
+    
     unrecognised_option=0
     while [ $# -gt 0 ]
     do
@@ -46,7 +46,7 @@ main()
 		exit 0
 		;;
 	    -s|--source)
-		source="$2"
+		uai_area="$2"
 		shift; shift # remove arg and value
 		;;
 	    -t|--target)
@@ -87,11 +87,11 @@ main()
                -no-emul-boot \
                -isohybrid-gpt-basdat \
                -o "${target_iso}" \
-               "${source}"; then
+               "${uai_area}"; then
 	# Tell the user where the ISO has been put
 	echo "Unattended ISO: ${target}"
     fi
 }
 
 # Invoke the main script entry point
-main()
+main
