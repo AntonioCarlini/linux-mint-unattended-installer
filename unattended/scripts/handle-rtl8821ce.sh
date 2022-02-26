@@ -10,6 +10,9 @@ if ! lspci | grep RTL8821CE; then
     exit
 fi
 
+# Currently the RTL8821CE doesn't work on my main network, so avoid installing the driver.
+exit
+
 # Install the RTL8821CE driver package (which uses DKMS)
 pkg=$(basename $(find  "$1" -name "*rtl8821ce-dkms*"))
 (cd "$1"; dpkg -i "./${pkg}")
