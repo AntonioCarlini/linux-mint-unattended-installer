@@ -25,6 +25,7 @@ run_ansible_playbooks() {
 main_actions() {
     this_script="$0"
     echo "Running ${this_script}"
+    source "$(dirname "$0")/config.cfg"
 
     echo "================================================================================"
     echo "Preparing RTL8125 (via dkms)"
@@ -75,6 +76,25 @@ main_actions() {
         run_ansible_playbooks "${ANSIBLE_SCRIPTS}"
     else
 	echo "NO ansible scripts to run for [${SYSTEM_CLASS}]"
+    fi
+
+    # Update the package manager
+    if [ "${apt_update}" = "1" ]; then
+	echo "Updating apt repository information"
+	apt-get update -y
+    fi
+    
+    # Upgrade the system
+    if [ "${software_upgrade}" = "1" ]; then
+	echo "Updating installed software"
+	apt-get upgrade -y
+    fi
+
+    # Upgrade to the latest kernel
+    if [ "${kernel_upgrade}" = "1" ]; then
+	echo "Updating to latest available kernel"
+	# Note: at the moment the script fails when trying 5.16. As a workaround, use a 5.15 kernel
+	"$(dirname "$0")/ubuntu-mainline-kernel.sh" -i 5.15.22 --yes
     fi
     
     # Stop this from running again

@@ -230,8 +230,9 @@ main()
 	mkdir -p "${uai_area}/${tree}"
 	cp -v -nRT "${git_top}/${tree}" "${uai_area}/${tree}"
     done
-    find bin -name ".gitignore" | xargs -i rm -v {}                          # Clear away any unnecessary .gitignore files
-    
+    cp "$(dirname 0)/config.cfg" "${uai_area}/unattended/scripts/config.cfg"       # Put the config file in the same directory as post-boot-installation.sh
+    find bin -name ".gitignore" | xargs -i rm -v {}                                # Clear away any unnecessary .gitignore files
+
     # Download specified Linux Mint ISO (unless already present) and loop mount
     echo "Download the Linux Mint ISO"
     wget -nc "${lm_download_url_prefix}/${lm_version}/linuxmint-${lm_version}-cinnamon-64bit.iso" -O "${source_iso_download_dir}/${source_iso_name}"
@@ -247,6 +248,11 @@ main()
     # Unmount the source ISO
     sudo umount "${mountpoint}"
 
+    # Put the kernel upgrade script in the boot media's unattended/scripts directory
+    if [ "${kernel_upgrade}" = "1" ]; then
+	wget -nc https://raw.githubusercontent.com/pimlie/ubuntu-mainline-kernel.sh/master/ubuntu-mainline-kernel.sh --directory-prefix="${uai_area}/unattended/scripts/"
+	chmod a+x "${uai_area}/unattended/scripts/ubuntu-mainline-kernel.sh"
+    fi
 
     # Cleanup.
     if [ ${perform_cleanup} -ne 0 ]; then

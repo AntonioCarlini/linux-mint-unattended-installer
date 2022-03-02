@@ -105,6 +105,7 @@ d-i apt-setup/universe boolean true
 ubiquity ubiquity/success_command string \
 	 mkdir -p /target/opt/unattended-install ; \
  	 cp /cdrom/unattended/scripts/*.sh /target/opt/unattended-install/. ; \
+ 	 cp /cdrom/unattended/scripts/config.cfg /target/opt/unattended-install/. ; \
 	 cp /cdrom/unattended/files/unattended-install.service /target/etc/systemd/system/. ;\
  	 cp -rT /cdrom/unattended/repositories/r8125-dkms /target/root/r8125-dkms ;\
 	 mkdir -p /target/root/packages ;\
