@@ -7,6 +7,7 @@
 #
 # The real starting point is the main_actions function.
 
+
 # This function cycles through a set of ansible scripts and invokes each in turn.
 #
 # $1, $2, ... $N: a set of ansible scripts to invoke 
@@ -22,6 +23,44 @@ run_ansible_playbooks() {
     done
 }
 
+
+# This function tries to upgrade to a later kernel, starting with the most recent and working backwards by version,
+# stopping when the candidate kernel is older than the currently installed kernel.
+#
+# This function is necessary as on at least one occasion attempting to install the latest kernel failed as no AMD build
+# was available. That is likely to have been a transient condition, but an unattended procedure should at least try to
+# work around such issues.
+upgrade_kernel() {
+    current_kernel=$(uname -r | sed 's/[-].*$//')
+    mainline_kernel_script="$(dirname "$0")/ubuntu-mainline-kernel.sh"
+
+    echo "Current kernel version: [${current_kernel}]"
+
+    kernel_versions=$("${mainline_kernel_script}"  -r -q | tr -s '[:space:]'  '\n' | sed '1!G;h;$!d')
+
+    local attempts=0
+
+    for candidate in ${kernel_versions}
+    do
+	fixed_candidate=$(echo ${candidate} | sed 's/^v\(.*\)/\1/')
+	if dpkg --compare-versions "${fixed_candidate}" "gt" "${current}"; then
+	    echo "Attempting to install ${candidate} *******************"
+	    if 	"${mainline_kernel_script}" -i "${fixed_candidate}" --yes; then
+		echo "Installed kernel ${candidate} *******************"
+		break
+	    else
+		echo "Failed to install kernel ${candidate}"
+	    fi
+	fi
+	attempts=$((attempts + 1))
+	if [ $attempts -ge 15 ]; then
+	    echo "Abandoning kernel upgrade: Too many unsuccessful attempts ($attempts)"
+	    break
+	fi
+    done
+}
+
+# This is the main entry point for this script.
 main_actions() {
     this_script="$0"
     echo "Running ${this_script}"
@@ -90,11 +129,10 @@ main_actions() {
 	apt-get upgrade -y
     fi
 
-    # Upgrade to the latest kernel
+    # Upgrade to the latest available kernel
     if [ "${kernel_upgrade}" = "1" ]; then
 	echo "Updating to latest available kernel"
-	# Note: at the moment the script fails when trying 5.16. As a workaround, use a 5.15 kernel
-	"$(dirname "$0")/ubuntu-mainline-kernel.sh" -i 5.15.22 --yes
+	upgrade_kernel
     fi
     
     # Stop this from running again
