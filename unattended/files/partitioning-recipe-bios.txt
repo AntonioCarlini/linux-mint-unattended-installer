@@ -2,7 +2,7 @@ disk_layout ::
         1 1 1 fat32
                 method{ biosgrub }
         .
-        580 100008 580 ext4
+        1000 100008 1000 ext4
                 $primary{ }
                 method{ format } format{ }
                 use_filesystem{ } filesystem{ ext4 }
