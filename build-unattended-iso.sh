@@ -89,7 +89,7 @@ main()
                -o "${target_iso}" \
                "${uai_area}"; then
 	# Tell the user where the ISO has been put
-	echo "Unattended ISO: ${target}"
+	echo "Unattended ISO: ${target_iso}"
     fi
 }
 
