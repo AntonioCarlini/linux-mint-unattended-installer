@@ -10,13 +10,13 @@ disk_layout ::
                 method{ efi } format{ }
                 mountpoint{ /boot/efi }
 		      .
-        1000 100008 1000 ext4
+        1500 100008 1500 ext4
                 $primary{ }
                 method{ format } format{ }
                 use_filesystem{ } filesystem{ ext4 }
                 mountpoint{ /boot }
         .
-        2000 2000 2000 linux-swap
+        4000 4000 4000 linux-swap
                 $lvmok{ } lv_name{ swap }
                 method{ swap } format{ }
         .
@@ -26,7 +26,7 @@ disk_layout ::
                 use_filesystem{ } filesystem{ ext4 }
                 mountpoint{ /home }
         .
-        20000 20000 20000 ext4
+        50000 50000 50000 ext4
                 $lvmok{ } lv_name{ root }
                 method{ format } format{ }
                 use_filesystem{ } filesystem{ ext4 }

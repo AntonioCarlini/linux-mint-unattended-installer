@@ -2,7 +2,7 @@
 
 Note: this is still a WIP so the instructions may be out of date!
 
-This is how to build an unattended install based on [Linux Mint 20.3](https://www.linuxmint.com/edition.php?id=292) from scratch.
+This is how to build an unattended install based on [Linux Mint 22](https://www.linuxmint.com/edition.php?id=292) from scratch.
 
 - Clone the repository and cd to the repository root.
 
