@@ -88,7 +88,7 @@ main_actions() {
     echo "Installing packages: [${PACKAGES}]"
     # Note: It has to be ${PACKAGES} here without double quotes otherwise apt-get treats
     # the whole string as a name for one package.
-    apt-get install -y --no-install-recommends "${PACKAGES}"
+    apt-get install -y --no-install-recommends ${PACKAGES}
 
     echo "================================================================================"
     echo "Downloading ansible playbooks"
